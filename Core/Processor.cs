@@ -16,12 +16,8 @@ public class Processor
         _logger = logger;
     }
 
-    public bool ProcessingEnabled { get; set; } = true;
-
     public async Task ProcessAsync(CancellationToken ct)
     {
-        if (!ProcessingEnabled) return;
-
         MyDbContext context = _factory.CreateDbContext();
 
         IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
@@ -33,6 +29,7 @@ public class Processor
                 .Where(entity => entity.State == ProcessState.Received)
                 .OrderBy(entity => entity.Key)
                 .Take(1000)
+                .TagWith(DbCommandTags.SkipLockedRows)
                 .AsTracking()
                 .ToListAsync(ct);
             await HandleEntitiesAsync(entities, ct);

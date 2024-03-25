@@ -11,6 +11,7 @@ public static class Extensions
         {
             contextOptionsBuilder
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                .AddInterceptors(new SkipLockedRowsQueryCommandInterceptor())
                 .UseNpgsql(
                     connectionString,
                     sqlOptions => sqlOptions

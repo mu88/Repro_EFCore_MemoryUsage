@@ -8,7 +8,8 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHostedService<CustomBackgroundService>();
-builder.Services.AddSingleton<Processor>();
+builder.Services.AddSingleton<BulkProcessor>();
+builder.Services.AddScoped<Processor>();
 builder.Services.ConfigureDatabase(builder.Configuration.GetConnectionString("AppDatabase") ?? throw new ArgumentNullException());
 
 WebApplication app = builder.Build();
@@ -36,7 +37,7 @@ app.MapPost("/prepare", async (MyDbContext context, [FromQuery(Name = "count")] 
     })
     .WithOpenApi();
 
-app.MapPost("/enable", (Processor processor) =>
+app.MapPost("/enable", (BulkProcessor processor) =>
     {
         processor.ProcessingEnabled = true;
 
@@ -44,7 +45,7 @@ app.MapPost("/enable", (Processor processor) =>
     })
     .WithOpenApi();
 
-app.MapPost("/disable", (Processor processor) =>
+app.MapPost("/disable", (BulkProcessor processor) =>
     {
         processor.ProcessingEnabled = false;
 
