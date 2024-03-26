@@ -18,7 +18,7 @@ public class Processor
 
     public async Task ProcessAsync(CancellationToken ct)
     {
-        MyDbContext context = _factory.CreateDbContext();
+        using MyDbContext context = _factory.CreateDbContext();
 
         IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
