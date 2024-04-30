@@ -5,7 +5,7 @@ namespace Core;
 
 public static class Extensions
 {
-    public static void ConfigureDatabase(this IServiceCollection services, string connectionString)
+    public static void ConfigureDatabase(this IServiceCollection services, string connectionString, bool disablePooledDbContextFactory)
     {
         void Options(DbContextOptionsBuilder contextOptionsBuilder)
         {
@@ -19,7 +19,14 @@ public static class Extensions
                         .EnableRetryOnFailure(6, TimeSpan.FromSeconds(30), Array.Empty<string>()));
         }
 
-        services.AddDbContextPool<MyDbContext>(Options);
-        services.AddPooledDbContextFactory<MyDbContext>(Options);
+        if (disablePooledDbContextFactory)
+        {
+            services.AddDbContextFactory<MyDbContext>(Options);
+        }
+        else
+        {
+            services.AddDbContextPool<MyDbContext>(Options);
+            services.AddPooledDbContextFactory<MyDbContext>(Options);
+        }
     }
 }

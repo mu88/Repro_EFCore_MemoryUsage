@@ -8,7 +8,7 @@ public class BulkProcessor
 
     public BulkProcessor(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
-    public bool ProcessingEnabled { get; set; } = true;
+    public bool ProcessingEnabled { get; set; } = false;
 
     public async Task ProcessAsync(CancellationToken ct)
     {

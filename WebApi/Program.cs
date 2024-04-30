@@ -1,5 +1,6 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHostedService<CustomBackgroundService>();
 builder.Services.AddSingleton<BulkProcessor>();
 builder.Services.AddScoped<Processor>();
-builder.Services.ConfigureDatabase(builder.Configuration.GetConnectionString("AppDatabase") ?? throw new ArgumentNullException());
+builder.Services.ConfigureDatabase(
+    builder.Configuration.GetConnectionString("AppDatabase") ?? throw new ArgumentNullException(),
+    builder.Configuration.GetValue<bool>("DisablePooledDbContextFactory"));
 
 WebApplication app = builder.Build();
 
@@ -22,6 +25,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapPost("/migrate", async (MyDbContext context) =>
+    {
+        await context.Database.MigrateAsync();
+
+        return Results.Empty;
+    })
+    .WithOpenApi();
 
 app.MapPost("/prepare", async (MyDbContext context, [FromQuery(Name = "count")] int count) =>
     {
